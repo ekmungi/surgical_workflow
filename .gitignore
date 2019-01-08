@@ -1,0 +1,8 @@
+*.avi
+.idea/*
+.ipynb_checkpoints/*
+.vscode/*
+__pycache__
+*.swp
+
+workflow/utils/\.ipynb_checkpoints/

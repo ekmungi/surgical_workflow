@@ -1,0 +1,73 @@
+[apt-fast 20:08:58]
+[apt-fast 20:08:58]Working... this may take a while.
+[apt-fast 20:08:58]
+
+12/10 20:08:59 [[1;32mNOTICE[0m] Downloading 5 item(s)
+
+12/10 20:08:59 [[1;32mNOTICE[0m] Verification finished successfully. file=/var/cache/apt/apt-fast/nvidia-docker2_2.0.3+docker18.09.0-1_all.deb
+
+12/10 20:08:59 [[1;32mNOTICE[0m] Download complete: /var/cache/apt/apt-fast/nvidia-docker2_2.0.3+docker18.09.0-1_all.deb
+
+12/10 20:08:59 [[1;32mNOTICE[0m] Verification finished successfully. file=/var/cache/apt/apt-fast/libnvidia-container-tools_1.0.0-1_amd64.deb
+
+12/10 20:08:59 [[1;32mNOTICE[0m] Download complete: /var/cache/apt/apt-fast/libnvidia-container-tools_1.0.0-1_amd64.deb
+
+12/10 20:08:59 [[1;32mNOTICE[0m] Verification finished successfully. file=/var/cache/apt/apt-fast/libnvidia-container1_1.0.0-1_amd64.deb
+
+12/10 20:08:59 [[1;32mNOTICE[0m] Download complete: /var/cache/apt/apt-fast/libnvidia-container1_1.0.0-1_amd64.deb
+
+12/10 20:09:00 [[1;32mNOTICE[0m] Verification finished successfully. file=/var/cache/apt/apt-fast/nvidia-container-runtime-hook_1.4.0-1_amd64.deb
+
+12/10 20:09:00 [[1;32mNOTICE[0m] Download complete: /var/cache/apt/apt-fast/nvidia-container-runtime-hook_1.4.0-1_amd64.deb
+[#18587d 160KiB/1.6MiB(9%) CN:2 DL:819KiB ETA:1s]
+[#18587d 1.2MiB/1.6MiB(77%) CN:2 DL:1.0MiB]
+
+12/10 20:09:01 [[1;32mNOTICE[0m] Verification finished successfully. file=/var/cache/apt/apt-fast/nvidia-container-runtime_2.0.0+docker18.09.0-1_amd64.deb
+
+12/10 20:09:01 [[1;32mNOTICE[0m] Download complete: /var/cache/apt/apt-fast/nvidia-container-runtime_2.0.0+docker18.09.0-1_amd64.deb
+
+Download Results:
+gid   |stat|avg speed  |path/URI
+======+====+===========+=======================================================
+444e3b|OK  |   2.8MiB/s|/var/cache/apt/apt-fast/nvidia-docker2_2.0.3+docker18.09.0-1_all.deb
+66d85f|OK  |   573KiB/s|/var/cache/apt/apt-fast/libnvidia-container-tools_1.0.0-1_amd64.deb
+68aa24|OK  |   645KiB/s|/var/cache/apt/apt-fast/libnvidia-container1_1.0.0-1_amd64.deb
+79d730|OK  |   1.0MiB/s|/var/cache/apt/apt-fast/nvidia-container-runtime-hook_1.4.0-1_amd64.deb
+18587d|OK  |   1.0MiB/s|/var/cache/apt/apt-fast/nvidia-container-runtime_2.0.0+docker18.09.0-1_amd64.deb
+
+Status Legend:
+(OK):download completed.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following additional packages will be installed:
+  libnvidia-container-tools libnvidia-container1 nvidia-container-runtime
+  nvidia-container-runtime-hook
+The following NEW packages will be installed:
+  libnvidia-container-tools libnvidia-container1 nvidia-container-runtime
+  nvidia-container-runtime-hook nvidia-docker2
+0 upgraded, 5 newly installed, 0 to remove and 0 not upgraded.
+Need to get 0 B/2.396 kB of archives.
+After this operation, 9.717 kB of additional disk space will be used.
+Selecting previously unselected package libnvidia-container1:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 512766 files and directories currently installed.)
+Preparing to unpack .../libnvidia-container1_1.0.0-1_amd64.deb ...
+Unpacking libnvidia-container1:amd64 (1.0.0-1) ...
+Selecting previously unselected package libnvidia-container-tools.
+Preparing to unpack .../libnvidia-container-tools_1.0.0-1_amd64.deb ...
+Unpacking libnvidia-container-tools (1.0.0-1) ...
+Selecting previously unselected package nvidia-container-runtime-hook.
+Preparing to unpack .../nvidia-container-runtime-hook_1.4.0-1_amd64.deb ...
+Unpacking nvidia-container-runtime-hook (1.4.0-1) ...
+Selecting previously unselected package nvidia-container-runtime.
+Preparing to unpack .../nvidia-container-runtime_2.0.0+docker18.09.0-1_amd64.deb ...
+Unpacking nvidia-container-runtime (2.0.0+docker18.09.0-1) ...
+Selecting previously unselected package nvidia-docker2.
+Preparing to unpack .../nvidia-docker2_2.0.3+docker18.09.0-1_all.deb ...
+Unpacking nvidia-docker2 (2.0.3+docker18.09.0-1) ...
+Setting up libnvidia-container1:amd64 (1.0.0-1) ...
+Setting up libnvidia-container-tools (1.0.0-1) ...
+Processing triggers for libc-bin (2.27-3ubuntu1) ...
+Setting up nvidia-container-runtime-hook (1.4.0-1) ...
+Setting up nvidia-container-runtime (2.0.0+docker18.09.0-1) ...
+Setting up nvidia-docker2 (2.0.3+docker18.09.0-1) ...

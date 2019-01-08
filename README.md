@@ -1,2 +1,1 @@
-# surgical_workflow
-Repository for analysis of surgical workflow in laparoscopy
+# endovis2018-challenge
