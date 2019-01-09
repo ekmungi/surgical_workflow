@@ -1,13 +1,13 @@
 import sys
 
 # sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/endovis/')
+sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
-from workflow.dataloader.workflow_dataset import kFoldWorkflowSplit
-from workflow.model.workflow_resnet_model import ResFeatureExtractor
-from workflow.utils.early_stopping import EarlyStopping
-from workflow.utils.cyclic_learning import LRSchedulerWithRestart, LRSchedulerWithRestart_V2
-from workflow.utils.helpers import get_optimizer, ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window
+from dataloader.workflow_dataset import kFoldWorkflowSplit
+from model.workflow_resnet_model import ResFeatureExtractor
+from utils.early_stopping import EarlyStopping
+from utils.cyclic_learning import LRSchedulerWithRestart, LRSchedulerWithRestart_V2
+from utils.helpers import get_optimizer, ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window
 
 from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 import torchvision.models as models

@@ -1,7 +1,7 @@
 import sys
 
 # sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/endovis/')
+sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 
 import math
@@ -22,9 +22,9 @@ from ignite.metrics import CategoricalAccuracy, Loss
 from ignite.handlers.early_stopping import EarlyStopping
 from ignite.contrib.handlers import LinearCyclicalScheduler
 
-from workflow.dataloader.workflow_dataset import kFoldWorkflowSplit
-from workflow.model.workflow_resnet_model import ResFeatureExtractor
-from workflow.utils.cyclic_learning import LRSchedulerWithRestart
+from dataloader.workflow_dataset import kFoldWorkflowSplit
+from model.workflow_resnet_model import ResFeatureExtractor
+from utils.cyclic_learning import LRSchedulerWithRestart
 
 
 
