@@ -1,7 +1,7 @@
 import sys, os
 
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/endovis/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 import numpy as np
 import imageio
@@ -12,8 +12,8 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import ToTensor
 
-from workflow.dataloader.workflow_dataset import WorkflowDataset
-from workflow.utils.helpers import ProgressBar, CumulativeMovingAvgStd
+from dataloader.workflow_dataset import WorkflowDataset
+from utils.helpers import ProgressBar, CumulativeMovingAvgStd
 
 import matplotlib.pyplot as plt
 

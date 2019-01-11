@@ -1,7 +1,7 @@
 import sys
 
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/surgical_workflow/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from dataloader.workflow_dataset import kFoldWorkflowSplit
 from model.workflow_resnet_model import ResFeatureExtractor

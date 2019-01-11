@@ -7,8 +7,8 @@ from tqdm import tqdm
 from math import sqrt
 
 
-# from workflow.utils.cyclic_learning import LRSchedulerWithRestart
-from workflow.optim.adamw import AdamW
+# from utils.cyclic_learning import LRSchedulerWithRestart
+from optim.adamw import AdamW
 
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, CosineAnnealingLR, ExponentialLR
@@ -174,7 +174,7 @@ class ModelCheckpoint(object):
                     self.best_loss = curr_loss
                     self.best_accuracy = curr_accuracy
                     if self.save_model:
-                        save_checkpoint({'model': model}, True, 
+                        save_checkpoint({'model': model.state_dict()}, True, 
                                         self.save_path, suffix)
 
         elif curr_accuracy is not None:
@@ -182,7 +182,7 @@ class ModelCheckpoint(object):
                 self.best_loss = curr_loss
                 self.best_accuracy = curr_accuracy
                 if self.save_model:
-                    save_checkpoint({'model': model}, True, 
+                    save_checkpoint({'model': model.state_dict()}, True, 
                                     self.save_path, suffix)
 
 

@@ -1,10 +1,10 @@
 import sys
 
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/surgical_workflow/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from argparse import ArgumentParser
-# from workflow.exec.train_V1 import train
+# from exec.train_V1 import train
 from exec.train_V5 import train
 from utils.helpers import create_handlers
 
@@ -100,16 +100,18 @@ def main():
                       help="Window names", default=[''])
     parser.add_argument("--save_model", type=str, dest="save_model",
                       help="Initiate save model", default="")
+    parser.add_argument("--suffix", type=str, dest="suffix",
+                      help="Additional suffix for the results folder", default="")
     ## ====================== Data related ====================== ##
 
     ## ====================== Other handlers ====================== ##
-    parser.add_argument("--pt", type=str, dest="pretrained",
-                      help="Path or name for pretrained model",
+    parser.add_argument("--pretrained", dest="pretrained", 
+                      help="Path or name for pretrained model", metavar="FILE",
                       default=None)
-    parser.add_argument("--handlers", type=str, dest="handler_list", nargs='+',
-                      help="List of handlers", default=[])
-    parser.add_argument("--step", type=float, dest="step_size",
-                      help="Step size for the parameter", default=1.)
+    # parser.add_argument("--handlers", type=str, dest="handler_list", nargs='+',
+    #                   help="List of handlers", default=[])
+    # parser.add_argument("--step", type=float, dest="step_size",
+    #                   help="Step size for the parameter", default=1.)
     # parser.add_argument("--checkpoint", type="bool", dest="model_checkpoint",
     #                   help="Use model checkpoint", default=False)
     # parser.add_argument("--checkpoint_interval", type="int", dest="checkpoint_interval",
@@ -165,7 +167,8 @@ def main():
                     'vislogger_env': options.vislogger_env,
                     'vislogger_port': options.vislogger_port,
                     'printlogger_interval': options.printlogger_interval,
-                    'save_model': options.save_model}
+                    'save_model': options.save_model,
+                    'suffix':options.suffix}
 
     visualizer_ops = {}
 

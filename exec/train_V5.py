@@ -1,7 +1,7 @@
 import sys
 
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/surgical_workflow/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from dataloader.workflow_dataset import kFoldWorkflowSplit
 from model.workflow_resnet_model import ResFeatureExtractor
@@ -145,7 +145,7 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     if (logger_options['save_model'] == ""):
         model_checkpoint = ModelCheckpoint()
     else:
-        suffix = optimizer_options['optimizer']+"_"+str(optimizer_options['learning_rate'])
+        suffix = optimizer_options['optimizer']+"_"+str(optimizer_options['learning_rate'])+"_"+logger_options['suffix']
         model_checkpoint = ModelCheckpoint(save_model=True, save_path=logger_options['save_model'], 
                                             use_loss=True, suffix=suffix) ####### FILL PARAMTERS!!!!
     ## ======================================= Save model ======================================= ##
@@ -185,8 +185,15 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
 
         ## ======================================= Model ======================================= ##
         # TODO: Pass 'models.resnet50' as string
+
         model = ResFeatureExtractor(pretrained_model=models.resnet101, 
-                                    device=device)
+                                        device=device)
+                                        
+        if model_options['pretrained'] is not None:
+            checkpoint = torch.load(model_options['pretrained'])
+            model.load_state_dict(checkpoint['model'])
+
+        
         ## ======================================= Model ======================================= ##
 
 

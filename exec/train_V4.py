@@ -1,7 +1,7 @@
 import sys
 
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/surgical_workflow/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 import threading
 import numpy as np

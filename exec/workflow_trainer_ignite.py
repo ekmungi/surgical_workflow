@@ -1,11 +1,11 @@
 import sys
 
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/endovis/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from argparse import ArgumentParser
-from workflow.exec.train_V3 import train
-from workflow.utils.helpers import create_handlers
+from exec.train_V3 import train
+from utils.helpers import create_handlers
 
 
 def main():

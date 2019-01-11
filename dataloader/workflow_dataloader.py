@@ -22,9 +22,9 @@
 # # from torchsample.transforms import Compose, ChannelsFirst, TypeCast, ResizePadArray, AddChannel, RangeNormalize
 # # from torchsample.transforms import ImgAugTranform, ImgAugCoTranform
 
-# from workflow.utils.helpers import kfold_split
-# from workflow.utils.tranformations import ImgAugTransform
-# from workflow.dataloader.workflow_dataset import WorkflowListDataset
+# from utils.helpers import kfold_split
+# from utils.tranformations import ImgAugTransform
+# from dataloader.workflow_dataset import WorkflowListDataset
 
 
 

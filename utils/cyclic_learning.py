@@ -1,7 +1,7 @@
 import sys
 
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/endovis/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 
 import numpy as np
@@ -15,8 +15,8 @@ import seaborn as sns
 
 from tqdm import tqdm
 
-from workflow.model.workflow_resnet_model import ResFeatureExtractor
-from workflow.utils.helpers import create_plot_window, get_optimizer
+from model.workflow_resnet_model import ResFeatureExtractor
+from utils.helpers import create_plot_window, get_optimizer
 
 class LRSchedulerWithRestart(_LRScheduler):
     """Proxy learning scheduler with restarts: learning rate follows input scheduler strategy but

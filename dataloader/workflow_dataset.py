@@ -1,6 +1,6 @@
 import sys, os
-# sys.path.append('/home/avemuri/DEV/projects/endovis2018-challenge/')
-sys.path.append('/media/anant/dev/src/endovis/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 
 from glob import glob
@@ -17,7 +17,7 @@ from torchvision.datasets import DatasetFolder
 
 from sklearn.model_selection import KFold
 
-from workflow.utils.helpers import kfold_split, fast_collate_nvidia_apex
+from utils.helpers import kfold_split, fast_collate_nvidia_apex
 
 from tqdm import tqdm
 
