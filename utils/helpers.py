@@ -5,6 +5,7 @@ from glob import glob
 import numpy as np
 from tqdm import tqdm
 from math import sqrt
+from sklearn import metrics
 
 
 # from utils.cyclic_learning import LRSchedulerWithRestart
@@ -205,6 +206,29 @@ class RunningAverage(object):
     def get_value(self):
         return self._value
 
+
+### ============================================================================================================== ###
+
+class Score:
+    def __init__(self, score_type='accuracy'):
+        self.score_type = score_type
+        if score_type == 'accuracy':
+            self.score_fn = metrics.accuracy_score
+        elif score_type == 'f1':
+            self.score_fn = metrics.f1_score
+        elif score_type == 'precision':
+            self.score_fn = metrics.precision_score
+        elif score_type == 'recall':
+            self.score_fn = metrics.recall_score
+        elif score_type == 'auc':
+            self.score_fn = metrics.roc_auc_score
+
+    def __call__(self, y_true, y_pred):
+        return self.score_fn(y_true, y_pred, average='micro')
+
+
+
+
 ### ============================================================================================================== ###
 
 class CumulativeMovingAvgStd(object):
@@ -281,7 +305,7 @@ def kfold_split(video_base_path, phase_base_path, instrument_base_path, video_ex
 class Engine(object):
     def __init__(self, model, optimizer, loss_fn, lr_scheduler, data_iterator=None,
                     accumulation_count=1, device='cpu', train=True, verbose=False,
-                    use_half_precision=False):
+                    use_half_precision=False, score_type='accuracy'):
         self.device = device
 
         if torch.cuda.device_count() > 1:
@@ -304,6 +328,8 @@ class Engine(object):
             # self.model = self.model.half()
         else:
             self.amp_handle = amp.init(enabled=False)
+
+        self.score = Score(score_type=score_type)
 
         
 
@@ -343,14 +369,15 @@ class Engine(object):
             with torch.no_grad():
                 y_pred_softmax = F.softmax(y_pred, dim=1)
                 y_pred_softmax_classes = torch.max(y_pred_softmax, 1)[1].cpu().numpy()
-                accuracy = np.mean(y_pred_softmax_classes == y.cpu().numpy().transpose())
+                score = self.score(y.cpu().numpy().transpose(), y_pred_softmax_classes)
+                # accuracy = np.mean(y_pred_softmax_classes == y.cpu().numpy().transpose())
 
                 if self.verbose:
-                    print('Loss: {0}, Accuracy: {1}, GT phases: {2}, Pred: {3}'.format(np.round(loss, 3), 
-                                                                                        np.round(accuracy, 3), 
-                                                                                        y.cpu().numpy().transpose(), 
-                                                                                        y_pred_softmax_classes))
-                return loss.item(), accuracy
+                    print('Loss: {0}, Score: {1}, GT phases: {2}, Pred: {3}'.format(np.round(loss, 3), 
+                                                                                    np.round(score, 3), 
+                                                                                    y.cpu().numpy().transpose(), 
+                                                                                    y_pred_softmax_classes))
+                return loss.item(), score
 
             
 
@@ -363,9 +390,10 @@ class Engine(object):
 
                 y_pred_softmax = F.softmax(y_pred, dim=1)
                 y_pred_softmax_classes = torch.max(y_pred_softmax, 1)[1].cpu().numpy()
-                accuracy = np.mean(y_pred_softmax_classes == y.cpu().numpy().transpose())
+                score = self.score(y.cpu().numpy().transpose(), y_pred_softmax_classes)
+                # accuracy = np.mean(y_pred_softmax_classes == y.cpu().numpy().transpose())
 
-                return loss.item(), accuracy
+                return loss.item(), score
         
         
 
@@ -392,10 +420,8 @@ class ProgressBar(tqdm):
     def __init__(self, iterator, desc, pb_len=None, device='cpu'):
         
         
-        if (pb_len is None) or (pb_len <= 0):
+        if (pb_len is None) or (pb_len <= 0) or (pb_len > len(iterator)):
             pb_len = len(iterator)
-
-        # iterator = iter(iterator)
         
         self.pb_len = pb_len
         tqdm.__init__(self, iterable=iterator, desc=desc, total=self.pb_len)
