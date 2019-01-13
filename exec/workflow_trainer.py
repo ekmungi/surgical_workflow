@@ -1,7 +1,7 @@
 import sys
 
-sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
-# sys.path.append('/media/anant/dev/src/surgical_workflow/')
+# sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from argparse import ArgumentParser
 # from exec.train_V1 import train
@@ -45,6 +45,8 @@ def main():
                         help="Use half precision", default=False)
     parser.add_argument("--run_nfolds", type=int, dest="run_nfolds",
                       help="Stop after nfolds", default=-1)
+    parser.add_argument("--switch_optimizer", action="store_true", dest="switch_optimizer",
+                        help="Switch optimizer after a few epochs", default=False)
     ## ====================== Optimizer  ====================== ##
 
 
@@ -143,7 +145,8 @@ def main():
                     'accumulate_count': options.accumulate_count,
                     'early_stopping': options.early_stopping,
                     'use_half_precision': options.use_half_precision,
-                    'run_nfolds': options.run_nfolds}
+                    'run_nfolds': options.run_nfolds,
+                    'switch_optimizer':options.switch_optimizer}
 
     scheduler_ops = {'scheduler': options.scheduler,
                     'parameter': options.parameter,

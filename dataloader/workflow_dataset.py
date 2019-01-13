@@ -193,7 +193,7 @@ class kFoldWorkflowSplit(DatasetFolder):
 
             valid_loader = DataLoader(ConcatDataset(valid_datasets),
                                         batch_size=self.batch_size,
-                                        shuffle=False,
+                                        shuffle=True,
                                         num_workers=self.num_workers, 
                                         pin_memory=True,
                                         collate_fn=self.coutom_collate_fn)
