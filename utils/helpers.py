@@ -113,21 +113,31 @@ def save_checkpoint(state, is_best, filename='checkpoint', suffix=""):
 
 ### ============================================================================================================== ###
 
-def get_optimizer(model_parameters, optimizer_ops):
+def get_optimizer(model_parameters, optimizer_ops, scheduler_options, data_iterator):
     if optimizer_ops['optimizer']=="sgd":
         optimizer = torch.optim.SGD(model_parameters, lr=optimizer_ops['learning_rate'], 
                                     momentum=optimizer_ops['momentum'], 
                                     weight_decay=optimizer_ops['weight_decay'])
     elif optimizer_ops['optimizer']=="adam":
-        optimizer = torch.optim.Adam(model_parameters, lr=optimizer_ops['learning_rate'])
+        optimizer = torch.optim.Adam(model_parameters, lr=optimizer_ops['learning_rate'], amsgrad=optimizer_ops['amsgrad'])
     elif optimizer_ops['optimizer']=="adamw":
         optimizer = AdamW(model_parameters, lr=optimizer_ops['learning_rate'], 
                             weight_decay=optimizer_ops['weight_decay'])
 
+
+    if scheduler_options['cycle_length'] > 0:
+        cycle_length = scheduler_options['cycle_length']
+    elif (optimizer_options['max_iterations'] is None) or (optimizer_options['max_iterations'] <= 0):
+        cycle_length = len(data_iterator)
+    else:
+        cycle_length = optimizer_options['max_iterations']
+    
+    scheduler(optimizer, cycle_length)
+
     # if (optimizer_ops['use_half_precision']):
     #     optimizer = FP16_Optimizer(optimizer, static_loss_scale=128.0)
 
-    return optimizer
+    return optimizer, scheduler
 
 ### ============================================================================================================== ###
 
@@ -222,9 +232,16 @@ class Score:
             self.score_fn = metrics.recall_score
         elif score_type == 'auc':
             self.score_fn = metrics.roc_auc_score
+        elif score_type == 'jaccard':
+            self.score_fn = metrics.jaccard_similarity_score
+
+        if score_type == 'jaccard':
+            self.kwargs = {'normalize': True}
+        else:
+            self.kwargs = {'average': 'micro'}
 
     def __call__(self, y_true, y_pred):
-        return self.score_fn(y_true, y_pred, average='micro')
+        return self.score_fn(y_true, y_pred, **self.kwargs)
 
 
 
@@ -419,8 +436,9 @@ class ProgressBar(tqdm):
     '''
     def __init__(self, iterator, desc, pb_len=None, device='cpu'):
         
-        
-        if (pb_len is None) or (pb_len <= 0) or (pb_len > len(iterator)):
+        if (pb_len < 1) and (pb_len > 0):
+            pb_len = int(len(iterator)*pb_len)
+        elif (pb_len is None) or (pb_len <= 0) or (pb_len > len(iterator)):
             pb_len = len(iterator)
         
         self.pb_len = pb_len

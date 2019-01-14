@@ -178,6 +178,7 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     
     nfolds_training_loss_avg = CumulativeMovingAvgStd()
     nfolds_validation_loss_avg = CumulativeMovingAvgStd()
+    nfolds_validation_score_avg = CumulativeMovingAvgStd()
 
     folds_pbar = ProgressBar(kfoldWorkflowSet, desc="Folds", pb_len=optimizer_options['run_nfolds'])
     max_folds = folds_pbar.total
@@ -211,23 +212,14 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
 
 
         ### ============================== Parts of Training step ============================== ###
-        criterion_CE = nn.CrossEntropyLoss().to(device)
-        # optimizer = get_optimizer(model.parameters(), optimizer_options)
-
-        # if scheduler_options['cycle_length'] > 0:
-        #     cycle_length = scheduler_options['cycle_length']
-        # elif (optimizer_options['max_iterations'] is None) or (optimizer_options['max_iterations'] <= 0):
-        #     cycle_length = len(train_loader)
-        # else:
-        #     cycle_length = optimizer_options['max_iterations']
-        # scheduler(optimizer, cycle_length)
+        criterion_CE = nn.CrossEntropyLoss().to(device)        
         ### ============================== Parts of Training step ============================== ###
         
         epoch_pbar = ProgressBar(range(epochs), desc="Epochs") #tqdm(range(epochs))
         epoch_training_avg_loss = CumulativeMovingAvgStd()
         epoch_training_avg_score = CumulativeMovingAvgStd()
-        epoch_validation_avg_loss = CumulativeMovingAvgStd()
-        epoch_validation_avg_score = CumulativeMovingAvgStd()
+        # epoch_validation_avg_loss = CumulativeMovingAvgStd()
+        # epoch_validation_avg_score = CumulativeMovingAvgStd()
         epoch_msg_dict = {}
 
         evaluator = Engine(model, None, criterion_CE, None, val_loader, 0, device, False,
@@ -238,28 +230,14 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
 
             if optimizer_options['switch_optimizer']:
                 if epoch % 2 == 0:
-                    optimizer = get_optimizer(model.parameters(), optimizer_options)
-
-                    if scheduler_options['cycle_length'] > 0:
-                        cycle_length = scheduler_options['cycle_length']
-                    elif (optimizer_options['max_iterations'] is None) or (optimizer_options['max_iterations'] <= 0):
-                        cycle_length = len(train_loader)
-                    else:
-                        cycle_length = optimizer_options['max_iterations']
-                    scheduler(optimizer, cycle_length)
+                    optimizer = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader)
                 else:
                     temp_optimizer_options = optimizer_options
                     temp_optimizer_options['optimizer'] = 'sgd'
                     temp_optimizer_options['learning_rate'] = 1e-3
-                    optimizer = get_optimizer(model.parameters(), temp_optimizer_options)
-
-                    if scheduler_options['cycle_length'] > 0:
-                        cycle_length = scheduler_options['cycle_length']
-                    elif (temp_optimizer_options['max_iterations'] is None) or (temp_optimizer_options['max_iterations'] <= 0):
-                        cycle_length = len(train_loader)
-                    else:
-                        cycle_length = temp_optimizer_options['max_iterations']
-                    scheduler(optimizer, cycle_length)
+                    optimizer = get_optimizer(model.parameters(), temp_optimizer_options, scheduler_options, train_loader)
+            else:
+                optimizer, scheduler = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader)
 
             runEpoch(train_loader, model, criterion_CE, optimizer, scheduler, device, 
                         vis, epoch, iFold, folds_pbar, epoch_training_avg_loss,
@@ -272,18 +250,18 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                     validation_loss, validation_score = predict(evaluator, 
                                                                 optimizer_options['max_valid_iterations'], 
                                                                 device, vis)
-                    epoch_validation_avg_loss.update(validation_loss)
-                    epoch_validation_avg_score.update(validation_score)
+                    # epoch_validation_avg_loss.update(validation_loss)
+                    # epoch_validation_avg_score.update(validation_score)
                     vis.line(X=np.array([epoch]), 
-                                Y=np.array([epoch_validation_avg_loss.get_value()[0]]),
+                                Y=np.array([validation_loss]),
                                 update='append', win='Validation_Loss_Fold_'+str(iFold+1), 
                                 name='Validation Loss Fold '+str(iFold+1))
                     vis.line(X=np.array([epoch]), 
-                                Y=np.array([epoch_validation_avg_score.get_value()[0]]),
+                                Y=np.array([validation_score]),
                                 update='append', win='Validation_Score_Fold_'+str(iFold+1), 
                                 name='Validation Score Fold '+str(iFold+1))
-                    epoch_msg_dict['AVL'] = epoch_validation_avg_loss.get_value()[0]
-                    epoch_msg_dict['AVS'] = epoch_validation_avg_score.get_value()[0]
+                    epoch_msg_dict['AVL'] = validation_loss#epoch_validation_avg_loss.get_value()[0]
+                    epoch_msg_dict['AVS'] = validation_score#epoch_validation_avg_score.get_value()[0]
                     folds_pbar.update_message(msg_dict=epoch_msg_dict)
             ### ============================== Validation ============================== ###
 
