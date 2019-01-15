@@ -16,7 +16,7 @@ import seaborn as sns
 from tqdm import tqdm
 
 from model.workflow_resnet_model import ResFeatureExtractor
-from utils.helpers import create_plot_window, get_optimizer
+from utils.helpers import create_plot_window
 
 class LRSchedulerWithRestart(_LRScheduler):
     """Proxy learning scheduler with restarts: learning rate follows input scheduler strategy but
@@ -155,6 +155,42 @@ class LRSchedulerWithRestart_V2:
         else:
             return self.lr_scheduler.get_lr()[0]
 
+
+
+def get_optimizer(model_parameters, optimizer_ops, scheduler_options, data_iterator, vis=None):
+    
+    scheduler = LRSchedulerWithRestart_V2(scheduler_type=scheduler_options['scheduler'], 
+                                            n_restarts=scheduler_options['n_restarts'], 
+                                            n_lr_updates=scheduler_options['n_param_updates'],
+                                            restart_factor=scheduler_options['restart_factor'], 
+                                            init_lr_factor=scheduler_options['init_lr_factor'],
+                                            eta_min=scheduler_options['eta_min'], vis=vis)
+
+
+    if optimizer_ops['optimizer']=="sgd":
+        optimizer = torch.optim.SGD(model_parameters, lr=optimizer_ops['learning_rate'], 
+                                    momentum=optimizer_ops['momentum'], 
+                                    weight_decay=optimizer_ops['weight_decay'])
+    elif optimizer_ops['optimizer']=="adam":
+        optimizer = torch.optim.Adam(model_parameters, lr=optimizer_ops['learning_rate'], amsgrad=optimizer_ops['amsgrad'])
+    elif optimizer_ops['optimizer']=="adamw":
+        optimizer = AdamW(model_parameters, lr=optimizer_ops['learning_rate'], 
+                            weight_decay=optimizer_ops['weight_decay'])
+
+
+    if scheduler_options['cycle_length'] > 0:
+        cycle_length = scheduler_options['cycle_length']
+    elif (optimizer_ops['max_iterations'] is None) or (optimizer_ops['max_iterations'] <= 0):
+        cycle_length = len(data_iterator)
+    else:
+        cycle_length = optimizer_ops['max_iterations']
+    
+    scheduler(optimizer, cycle_length)
+
+    # if (optimizer_ops['use_half_precision']):
+    #     optimizer = FP16_Optimizer(optimizer, static_loss_scale=128.0)
+
+    return optimizer, scheduler
 
 
 def test(schedular_type):

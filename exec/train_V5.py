@@ -1,13 +1,13 @@
 import sys
 
-# sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
 # sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from dataloader.workflow_dataset import kFoldWorkflowSplit
 from model.workflow_resnet_model import ResFeatureExtractor
 from utils.early_stopping import EarlyStopping
-from utils.cyclic_learning import LRSchedulerWithRestart, LRSchedulerWithRestart_V2
-from utils.helpers import get_optimizer, ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window, BestScore
+from utils.helpers import ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window, BestScore
+from utils.optimizer_utils import get_optimizer
 
 from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 import torchvision.models as models
@@ -143,12 +143,7 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     
 
     ## ======================================= Scheduler ======================================= ##
-    scheduler = LRSchedulerWithRestart_V2(scheduler_type=scheduler_options['scheduler'], 
-                                            n_restarts=scheduler_options['n_restarts'], 
-                                            n_lr_updates=scheduler_options['n_param_updates'],
-                                            restart_factor=scheduler_options['restart_factor'], 
-                                            init_lr_factor=scheduler_options['init_lr_factor'],
-                                            eta_min=scheduler_options['eta_min'], vis=vis)
+    
     ## ======================================= Scheduler ======================================= ##
 
     ## ======================================= Save model ======================================= ##
@@ -163,11 +158,11 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     ## ======================================= Data ======================================= ##
     # image_transform = Compose([Resize(data_options['image_size'])])
     # image_transform = Compose([Resize(data_options['image_size']), ToTensor()])
-    image_transform = Compose([Resize(data_options['image_size']), ToTensor()])#,
+    image_transform = Compose([Resize(data_options['image_size']), ToTensor(),#])
                                 # Normalize(mean=[0.485, 0.2131, 0.406],
                                 #             std=[0.229, 0.224, 0.225])])#,
-                                # Normalize(mean=[0.3610,0.2131,0.2324],
-                                #             std=[0.0624,0.0463,0.0668])])
+                                Normalize(mean=[0.3610,0.2131,0.2324],
+                                            std=[0.0624,0.0463,0.0668])])
     kfoldWorkflowSet = kFoldWorkflowSplit(data_options['base_path'], 
                                             image_transform=image_transform,
                                             video_extn='.avi', shuffle=True,
@@ -230,14 +225,14 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
 
             if optimizer_options['switch_optimizer']:
                 if epoch % 2 == 0:
-                    optimizer = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader)
+                    optimizer = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader, vis)
                 else:
                     temp_optimizer_options = optimizer_options
                     temp_optimizer_options['optimizer'] = 'sgd'
                     temp_optimizer_options['learning_rate'] = 1e-3
-                    optimizer = get_optimizer(model.parameters(), temp_optimizer_options, scheduler_options, train_loader)
+                    optimizer = get_optimizer(model.parameters(), temp_optimizer_options, scheduler_options, train_loader, vis)
             else:
-                optimizer, scheduler = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader)
+                optimizer, scheduler = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader, vis)
 
             runEpoch(train_loader, model, criterion_CE, optimizer, scheduler, device, 
                         vis, epoch, iFold, folds_pbar, epoch_training_avg_loss,
@@ -261,8 +256,8 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                                 Y=np.array([validation_score]),
                                 update='append', win='Validation_Score_Fold_'+str(iFold+1), 
                                 name='Validation Score Fold '+str(iFold+1))
-                    epoch_msg_dict['AVL'] = validation_loss#epoch_validation_avg_loss.get_value()[0]
-                    epoch_msg_dict['AVS'] = validation_score#epoch_validation_avg_score.get_value()[0]
+                    epoch_msg_dict['AVL'] = validation_loss
+                    epoch_msg_dict['AVS'] = validation_score
                     epoch_msg_dict['Best AVL'] = epoch_validation_loss.score()[0]
                     epoch_msg_dict['Best AVS'] = epoch_validation_loss.score()[1][0]
                     folds_pbar.update_message(msg_dict=epoch_msg_dict)
