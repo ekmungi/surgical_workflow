@@ -278,6 +278,35 @@ class CumulativeMovingAvgStd(object):
 
 ### ============================================================================================================== ###
 
+class BestScore(object):
+    def __init__(self, mode='min'):
+        self._score = None
+        self._additional_score_list = None
+        self._init_is_better(mode)
+
+    def step(self, val, additional_val_list=[]):
+        if self._score is None:
+            self._score = val
+            self._additional_score_list = additional_val_list
+        elif self.is_better(val, self._score):
+            self._score = val
+            self._additional_score = additional_val_list
+
+
+    def _init_is_better(self, mode):
+        if mode not in {'min', 'max'}:
+            raise ValueError('mode ' + mode + ' is unknown!')
+        if mode == 'min':
+            self.is_better = lambda a, best: a < best
+        if mode == 'max':
+            self.is_better = lambda a, best: a > best
+
+
+    def score(self):
+        return self._score, self._additional_score
+
+### ============================================================================================================== ###
+
 def create_handlers(handler_list, handler_options, optimizer_options, 
                     model_options):
     

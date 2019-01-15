@@ -7,7 +7,7 @@ from dataloader.workflow_dataset import kFoldWorkflowSplit
 from model.workflow_resnet_model import ResFeatureExtractor
 from utils.early_stopping import EarlyStopping
 from utils.cyclic_learning import LRSchedulerWithRestart, LRSchedulerWithRestart_V2
-from utils.helpers import get_optimizer, ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window
+from utils.helpers import get_optimizer, ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window, BestScore
 
 from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 import torchvision.models as models
@@ -218,8 +218,8 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
         epoch_pbar = ProgressBar(range(epochs), desc="Epochs") #tqdm(range(epochs))
         epoch_training_avg_loss = CumulativeMovingAvgStd()
         epoch_training_avg_score = CumulativeMovingAvgStd()
-        # epoch_validation_avg_loss = CumulativeMovingAvgStd()
-        # epoch_validation_avg_score = CumulativeMovingAvgStd()
+        epoch_validation_loss = BestScore()
+        # epoch_validation_score = BestScore()
         epoch_msg_dict = {}
 
         evaluator = Engine(model, None, criterion_CE, None, val_loader, 0, device, False,
@@ -245,13 +245,14 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                         epoch_msg_dict)
 
             ### ============================== Validation ============================== ###
+            validation_loss, validation_score = None, None
             if (optimizer_options["validation_interval_epochs"] > 0):
                 if ((epoch+1) % optimizer_options["validation_interval_epochs"] == 0):
                     validation_loss, validation_score = predict(evaluator, 
                                                                 optimizer_options['max_valid_iterations'], 
                                                                 device, vis)
-                    # epoch_validation_avg_loss.update(validation_loss)
-                    # epoch_validation_avg_score.update(validation_score)
+                    epoch_validation_loss.step(validation_loss, [validation_score])
+                    # epoch_validation_score.step(validation_score)
                     vis.line(X=np.array([epoch]), 
                                 Y=np.array([validation_loss]),
                                 update='append', win='Validation_Loss_Fold_'+str(iFold+1), 
@@ -262,12 +263,14 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                                 name='Validation Score Fold '+str(iFold+1))
                     epoch_msg_dict['AVL'] = validation_loss#epoch_validation_avg_loss.get_value()[0]
                     epoch_msg_dict['AVS'] = validation_score#epoch_validation_avg_score.get_value()[0]
+                    epoch_msg_dict['Best AVL'] = epoch_validation_loss.score()[0]
+                    epoch_msg_dict['Best AVS'] = epoch_validation_loss.score()[1][0]
                     folds_pbar.update_message(msg_dict=epoch_msg_dict)
             ### ============================== Validation ============================== ###
 
 
             ### ============================== Save model ============================== ###
-            model_checkpoint.step(curr_loss=epoch_validation_avg_loss.get_value()[0],
+            model_checkpoint.step(curr_loss=validation_loss,
                                     model=model, suffix='_Fold_'+str(iFold))
             vis.save([logger_options['vislogger_env']])
             ### ============================== Save model ============================== ###
