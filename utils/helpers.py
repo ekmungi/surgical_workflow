@@ -260,13 +260,13 @@ class BestScore(object):
         self._additional_score_list = None
         self._init_is_better(mode)
 
-    def step(self, val, additional_val_list=[]):
+    def step(self, val, additional_val_list=[None]):
         if self._score is None:
             self._score = val
             self._additional_score_list = additional_val_list
         elif self.is_better(val, self._score):
             self._score = val
-            self._additional_score = additional_val_list
+            self._additional_score_list = additional_val_list
 
 
     def _init_is_better(self, mode):
@@ -279,7 +279,7 @@ class BestScore(object):
 
 
     def score(self):
-        return self._score, self._additional_score
+        return self._score, self._additional_score_list
 
 ### ============================================================================================================== ###
 

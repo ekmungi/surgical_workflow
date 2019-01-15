@@ -256,10 +256,10 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                                 Y=np.array([validation_score]),
                                 update='append', win='Validation_Score_Fold_'+str(iFold+1), 
                                 name='Validation Score Fold '+str(iFold+1))
-                    epoch_msg_dict['AVL'] = validation_loss
-                    epoch_msg_dict['AVS'] = validation_score
-                    epoch_msg_dict['Best AVL'] = epoch_validation_loss.score()[0]
-                    epoch_msg_dict['Best AVS'] = epoch_validation_loss.score()[1][0]
+                    epoch_msg_dict['CVL'] = validation_loss
+                    epoch_msg_dict['CVS'] = validation_score
+                    epoch_msg_dict['BVL'] = epoch_validation_loss.score()[0]
+                    epoch_msg_dict['BVS'] = epoch_validation_loss.score()[1][0]
                     folds_pbar.update_message(msg_dict=epoch_msg_dict)
             ### ============================== Validation ============================== ###
 
