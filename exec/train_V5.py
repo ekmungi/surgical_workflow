@@ -158,11 +158,11 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     ## ======================================= Data ======================================= ##
     # image_transform = Compose([Resize(data_options['image_size'])])
     # image_transform = Compose([Resize(data_options['image_size']), ToTensor()])
-    image_transform = Compose([Resize(data_options['image_size']), ToTensor(),#])
+    image_transform = Compose([Resize(data_options['image_size']), ToTensor()])
                                 # Normalize(mean=[0.485, 0.2131, 0.406],
                                 #             std=[0.229, 0.224, 0.225])])#,
-                                Normalize(mean=[0.3610,0.2131,0.2324],
-                                            std=[0.0624,0.0463,0.0668])])
+                                # Normalize(mean=[0.3610,0.2131,0.2324],
+                                #             std=[0.0624,0.0463,0.0668])])
     kfoldWorkflowSet = kFoldWorkflowSplit(data_options['base_path'], 
                                             image_transform=image_transform,
                                             video_extn='.avi', shuffle=True,
@@ -223,16 +223,15 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
 
         for epoch in epoch_pbar:
 
-            if optimizer_options['switch_optimizer']:
-                if epoch % 2 == 0:
-                    optimizer = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader, vis)
-                else:
-                    temp_optimizer_options = optimizer_options
-                    temp_optimizer_options['optimizer'] = 'sgd'
-                    temp_optimizer_options['learning_rate'] = 1e-3
-                    optimizer = get_optimizer(model.parameters(), temp_optimizer_options, scheduler_options, train_loader, vis)
+            if (optimizer_options['switch_optimizer'] > 0) and ((epoch+1) % optimizer_options['switch_optimizer'] == 0):
+                temp_optimizer_options = optimizer_options
+                temp_optimizer_options['optimizer'] = 'sgd'
+                temp_optimizer_options['learning_rate'] = 1e-3
+                optimizer, scheduler = get_optimizer(model.parameters(), temp_optimizer_options, scheduler_options, train_loader, vis)
             else:
                 optimizer, scheduler = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader, vis)
+            # else:
+            #     optimizer, scheduler = get_optimizer(model.parameters(), optimizer_options, scheduler_options, train_loader, vis)
 
             runEpoch(train_loader, model, criterion_CE, optimizer, scheduler, device, 
                         vis, epoch, iFold, folds_pbar, epoch_training_avg_loss,

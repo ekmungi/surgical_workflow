@@ -45,8 +45,8 @@ def main():
                         help="Use half precision", default=False)
     parser.add_argument("--run_nfolds", type=int, dest="run_nfolds",
                       help="Stop after nfolds", default=-1)
-    parser.add_argument("--switch_optimizer", action="store_true", dest="switch_optimizer",
-                        help="Switch optimizer after a few epochs", default=False)
+    parser.add_argument("--switch_optimizer", type=int, dest="switch_optimizer",
+                        help="Switch optimizer after a few epochs", default=-1)
     parser.add_argument("--amsgrad", action="store_true", dest="amsgrad",
                         help="Use amsgrad", default=False)
     ## ====================== Optimizer  ====================== ##
