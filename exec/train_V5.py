@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+# sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
 # sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from dataloader.workflow_dataset import kFoldWorkflowSplit

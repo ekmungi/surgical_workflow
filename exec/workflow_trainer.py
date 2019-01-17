@@ -1,7 +1,7 @@
 import sys
 
-sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
-# sys.path.append('/media/anant/dev/src/surgical_workflow/')
+# sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
+sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
 from argparse import ArgumentParser
 # from exec.train_V1 import train
