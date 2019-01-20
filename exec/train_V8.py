@@ -3,7 +3,7 @@ import sys
 # sys.path.append('/home/avemuri/DEV/src/surgical_workflow/')
 sys.path.append('/media/anant/dev/src/surgical_workflow/')
 
-from dataloader.workflow_dataset_mt import kFoldWorkflowSplitMT
+from dataloader.workflow_dataset_mt_bg import kFoldWorkflowSplitMT
 from model.workflow_resnet_model import ResFeatureExtractor
 from utils.early_stopping import EarlyStopping
 from utils.helpers import ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window, BestScore
@@ -18,48 +18,38 @@ import torch
 import numpy as np
 import time
 
-# from batchgenerators.dataloading import SlimDataLoaderBase
-# from batchgenerators.transforms import RangeTransform, NumpyToTensor, SimulateLowResolutionTransform, Compose
-# from batchgenerators.dataloading import MultiThreadedAugmenter
-# from batchgenerators.transforms.sample_normalization_transforms import MeanStdNormalizationTransform
+
+from batchgenerators.transforms import RangeTransform, NumpyToTensor, Resize, Compose, ChannelFirst, RangeNormalize
+from batchgenerators.transforms.sample_normalization_transforms import MeanStdNormalizationTransform
 
 from tqdm import tqdm, trange
 
 from imgaug import augmenters as iaa
 
-# class WorkflowDataloader(SlimDataLoaderBase):
-#     def generate_train_batch(self):
-#         data = np.random.choice(len(self._data), self.batch_size, replace=True)
-#         images, labels = [], []
-#         for idx in idxs:
-#             i, l = self._data[idx]
-#             images.append(i)
-#             labels.append(l)
-#         images = np.vstack(images)
-#         labels = np.vstack(labels)
-#         return {'data': images, 'target': labels}
 
 
 
 if __name__ == '__main__':
 
-    # dataset = WorkflowDataset(video_path='/home/avemuri/DEV/Data/Endoviz2018/workflow_challenge/COMPRESSED_0_05/TrainingSet/videos/Prokto1_cleaned_compressed_0_05.avi',
-    #                             phase_path='/home/avemuri/DEV/Data/Endoviz2018/workflow_challenge/COMPRESSED_0_05/TrainingSet/phase_annotations/Prokto1_cleaned_compressed_0_05.csv',
-    #                             num_phases=14)
-
-    EPOCHS = 1
-    ITERATIONS = 8
-    FOLDS = 1
-    # image_transform = []
+    EPOCHS = 2
+    ITERATIONS = 60
+    FOLDS = 3
+    
+    image_transform = []
     # tr_transforms.append(MirrorTransform((0, 1)))
     # tr_transforms.append(GaussianNoiseTransform(p_per_sample=0.3))
     # image_transform.append()
 
-    image_transform = iaa.Sequential([iaa.Scale(0.5)])
+    # image_transform = iaa.Sequential([iaa.Scale(0.25)])
     
-    # Compose([SimulateLowResolutionTransform(zoom_range=[0.25, 0.25]),
-    #                             #RangeTransform(rnge=(0,1), data_key='data'),
-    #                             NumpyToTensor(keys=['data', 'target'])])
+    image_transform = Compose([Resize(0.5), 
+                                ChannelFirst(), 
+                                RangeNormalize(0., 1.0),
+                                #RangeTransform(rnge=(0,1), data_key='data'),
+                                MeanStdNormalizationTransform(mean=[0.3610,0.2131,0.2324],
+                                                                std=[0.0624,0.0463,0.0668]),
+                                NumpyToTensor(keys=['data', 'target'])
+                                ])
     
     
     kfoldWorkflowSet = kFoldWorkflowSplitMT('/home/anant/data/endovis/COMPRESSED_0_05/TrainingSet/', 
@@ -67,7 +57,7 @@ if __name__ == '__main__':
                                             video_extn='.avi', shuffle=True,
                                             n_folds=21, num_phases=14,
                                             batch_size=32, 
-                                            num_workers=4)
+                                            num_workers=12)
 
     eta = CumulativeMovingAvgStd()
 
@@ -75,18 +65,18 @@ if __name__ == '__main__':
         train_gen, valid_gen = next(kfoldWorkflowSet)
         for epoch in range(EPOCHS):
             t0 = time.time()
-            for iteration in trange(ITERATIONS):
-                batch = train_gen.get_batch()
-                images = batch.images_aug
-                phase_annotations = batch.data
-                print (images.shape, phase_annotations.shape)
+            for iteration in range(ITERATIONS):
+                data_dict = next(train_gen)
+                images = data_dict['data']
+                phase_annotations = data_dict['target']
+                # print (images.shape, phase_annotations.shape)
             t1 = time.time()
             print('Fold {0}, Epoch {1} : {2}'.format(iFold, epoch, np.round(t1-t0,2)))
-        time.sleep(0.01)
+            time.sleep(0.01)
         if iFold+1 == FOLDS:
             break
-        del(train_gen)
-        del(valid_gen)
+        # del(train_gen)
+        # del(valid_gen)
 
     # with ProgressBar(kfoldWorkflowSet, desc="FOLDS", pb_len=FOLDS) as folds_pbar:
     #     epoch_msg_dict = {}

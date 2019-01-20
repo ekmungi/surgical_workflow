@@ -21,7 +21,7 @@ from ignite.contrib.handlers import LinearCyclicalScheduler, CosineAnnealingSche
 from apex.fp16_utils import FP16_Optimizer
 from apex import amp
 
-import threading
+import threading, time
 
 
 # from utils.optimizer_utils import LRSchedulerWithRestart, LRSchedulerWithRestart_V2
@@ -50,7 +50,6 @@ def fast_collate_nvidia_apex(batch):
     return tensor, targets
 
 ### ============================================================================================================== ###
-
 
 class DataPrefetcher():
     def __init__(self, loader):
@@ -103,7 +102,6 @@ class DataPrefetcher():
 
     def __len__(self):
         return len(self.loader)
-
 
 ### ============================================================================================================== ###
 
@@ -439,15 +437,15 @@ class ProgressBar(tqdm):
     '''
     TODO: Add a member function to update the iteration length and send a break signal when its complete.
     '''
-    def __init__(self, iterator, desc, pb_len=None, device='cpu'):
+    def __init__(self, iterator, desc, pb_len=None):
         
         if (pb_len is not None) and (pb_len < 1) and (pb_len > 0):
-                pb_len = int(len(iterator)*pb_len)
+            pb_len = int(len(iterator)*pb_len)
         elif (pb_len is None) or (pb_len <= 0) or (pb_len > len(iterator)):
             pb_len = len(iterator)
         
         self.pb_len = pb_len
-        tqdm.__init__(self, iterable=iterator, desc=desc, total=self.pb_len)
+        super(ProgressBar, self).__init__(iterable=iterator, desc=desc, total=self.pb_len)
         # self.pbar = tqdm(iterator, self.pb_len, desc=desc)
 
     def update_message(self, base_msg="", msg_dict={}):
@@ -463,6 +461,20 @@ class ProgressBar(tqdm):
 
         self.set_postfix_str(msg)
         self.refresh()
+
+    def __len__(self):
+        return self.pb_len
+
+    def step(self, iteration):
+        # print ("\n\n\n{}\n\n\n".format(self.n))
+        time.sleep(0.5)
+        if iteration == self.pb_len:
+            self.update(self.pb_len-self.n)
+            self.refresh()
+            self.close()
+            return True
+        else:
+            return False
 
 # class BatchSampler_V1(Sampler):
 #     r"""Wraps another sampler to yield a mini-batch of indices.
