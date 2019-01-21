@@ -55,7 +55,7 @@ if __name__ == '__main__':
     kfoldWorkflowSet = kFoldWorkflowSplitMT('/home/anant/data/endovis/COMPRESSED_0_05/TrainingSet/', 
                                             image_transform=image_transform,
                                             video_extn='.avi', shuffle=True,
-                                            n_folds=21, num_phases=14,
+                                            n_folds=3, num_phases=14,
                                             batch_size=32, 
                                             num_workers=12)
 
