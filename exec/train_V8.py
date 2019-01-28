@@ -248,7 +248,7 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     ## ======================================= Data ======================================= ##
     # image_transform = Compose([Resize(data_options['image_size'])])
     # image_transform = Compose([Resize(data_options['image_size']), ToTensor()])
-    image_transform = Compose([#Resize(0.5), 
+    image_transform = Compose([#Resize(data_options['image_size']), 
                                 ChannelFirst(), 
                                 RangeNormalize(0., 1.0),
                                 #RangeTransform(rnge=(0,1), data_key='data'),
