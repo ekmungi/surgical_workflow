@@ -222,11 +222,13 @@ class kFoldWorkflowSplitMT(DatasetFolder):
         self.train_bg_augmenter = None
         self.valid_bg_augmenter = None
 
-        print("\n\nBuilding generator list...")
-        t0 = time.time()
-        self._build_generator_list()
-        t1 = time.time()
-        print("\n\n\nDuration: {0}\n\n\n".format(np.round(t1-t0,2)))
+        self.n_max_generators = 3
+
+        # print("\n\nBuilding generator list...")
+        # t0 = time.time()
+        # self._build_generator()
+        # t1 = time.time()
+        # print("\n\n\nDuration: {0}\n\n\n".format(np.round(t1-t0,2)))
         
 
     def _process_input_(self):
@@ -258,24 +260,23 @@ class kFoldWorkflowSplitMT(DatasetFolder):
         self.kf_split_iter = iter(self.kf_split.split(self.video_list))
 
 
-    def _build_generator_list(self):
-        self.train_batchgenerator = []
-        self.valid_batchgenerator = []
-        for iFold in trange(self.n_folds):
-            train_index, valid_index = next(self.kf_split_iter)
-            # print(train_index, valid_index)
+    def _build_generator(self):
+        self.train_batchgenerator = None
+        self.valid_batchgenerator = None
+        # for iFold in trange(self.n_folds):
+        train_index, valid_index = next(self.kf_split_iter)
+        # print(train_index, valid_index)
 
-            train_datasets = self._accumulate_datasets_(train_index)
-            valid_datasets = self._accumulate_datasets_(valid_index)
+        train_datasets = self._accumulate_datasets_(train_index)
+        valid_datasets = self._accumulate_datasets_(valid_index)
 
-            self.train_batchgenerator.append(WorkflowBatchGenerator(data=train_datasets, batch_size=self.batch_size))
+        self.train_batchgenerator = WorkflowBatchGenerator(data=train_datasets, batch_size=self.batch_size)
+        self.valid_batchgenerator = WorkflowBatchGenerator(data=valid_datasets, batch_size=self.batch_size)
 
-            self.valid_batchgenerator.append(WorkflowBatchGenerator(data=valid_datasets, batch_size=self.batch_size))
-
-            # train_bg_augmenter = MultiThreadedAugmenter(train_batchgenerator, self.image_transform, 
-            #                                             self.num_workers, pin_memory=True)
-            # valid_bg_augmenter = MultiThreadedAugmenter(valid_batchgenerator, self.image_transform, 
-            #                                             self.num_workers, pin_memory=True)
+        # train_bg_augmenter = MultiThreadedAugmenter(train_batchgenerator, self.image_transform, 
+        #                                             self.num_workers, pin_memory=True)
+        # valid_bg_augmenter = MultiThreadedAugmenter(valid_batchgenerator, self.image_transform, 
+        #                                             self.num_workers, pin_memory=True)
 
             
 
@@ -285,17 +286,22 @@ class kFoldWorkflowSplitMT(DatasetFolder):
     def __next__(self):
 
         if self.n <= self.n_folds:
+            # t0 = time.time()
+            self._build_generator()
+            # t1 = time.time()
+            # print("\n\n\nDuration: {0} {1}\n\n\n".format(np.round(t1-t0,2), self.n))
+
             if self.train_bg_augmenter is None:
-                self.train_bg_augmenter = MultiThreadedAugmenter(self.train_batchgenerator[self.n], self.image_transform, 
+                self.train_bg_augmenter = MultiThreadedAugmenter(self.train_batchgenerator, self.image_transform, 
                                                                     self.num_workers, pin_memory=True)
             else:
-                self.train_bg_augmenter.set_generator(self.train_batchgenerator[self.n])
+                self.train_bg_augmenter.set_generator(self.train_batchgenerator)
 
             if self.valid_bg_augmenter is None:
-                self.valid_bg_augmenter = MultiThreadedAugmenter(self.valid_batchgenerator[self.n], self.image_transform, 
+                self.valid_bg_augmenter = MultiThreadedAugmenter(self.valid_batchgenerator, self.image_transform, 
                                                                     self.num_workers, pin_memory=True)
             else:
-                self.valid_bg_augmenter.set_generator(self.valid_batchgenerator[self.n])
+                self.valid_bg_augmenter.set_generator(self.valid_batchgenerator)
 
             self.n += 1            
         
