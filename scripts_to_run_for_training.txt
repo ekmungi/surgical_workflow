@@ -1,0 +1,41 @@
+##################################################################################################
+# For earlier scripts - IGNORE!!
+# Perform training
+
+python train.py -t /media/anant/dev/data/endovis_sample/test/ -v /media/anant/dev/data/endovis_sample/test/ -e 1 --visualize 20 --test 100 --lr 4.21e-5 --save /media/anant/dev/intermediate/endovis/ --suffix sgd --optimizer SGD
+
+
+# Find best learning rate
+python train.py -t /media/anant/dev/data/endovis_sample/test/ --glr --save /media/anant/dev/intermediate/endovis/ -e 25 --visualize 440 --minlr -6 --maxlr -1 --optimizer sgd
+
+
+
+
+python workflow_trainer.py --base /home/anant/data/endovis/COMPRESSED_0_05/TrainingSet/ --threads 4 --batchsize 18 --imagesize 640 360 --optimizer adam --lr 1e-4 --max_iterations 1500 --max_valid_iterations 500 --epochs 300 --validation_interval 500 --folds 18 --device cuda:0 --vislogger_env 2080Ti_Workflow --scheduler exponential_R --n_param_updates 10 --cycle_length 50 --restart_factor 1. --init_lr_factor 1.
+
+
+python workflow_trainer.py --base /home/anant/data/endovis/COMPRESSED_0_05/TrainingSet/ --threads 12 --batchsize 20 --imagesize 640 360 --optimizer adam --lr 1e-6 --max_iterations 3000 --max_valid_iterations 1500 --epochs 300 --folds 24 --device cuda:0 --vislogger_env 2080Ti_Workflow --scheduler exponential_R --cycle_length 250 --nrestarts 1 --n_param_updates 15 --restart_factor 1. --init_lr_factor 1. --save_model /home/anant/data/endovis/COMPRESSED_0_05/results/
+
+
+python workflow_trainer.py --base /home/anant/data/endovis/COMPRESSED_0_05/TrainingSet/ --threads 12 --batchsize 20 --imagesize 640 360 --optimizer adam --lr 1e-4 --max_iterations 3000 --max_valid_iterations 1500 --epochs 300 --folds 24 --device cuda:0 --vislogger_env 2080Ti_Workflow --scheduler exponential_R --cycle_length 500 --nrestarts 1 --n_param_updates 5 --restart_factor 1. --init_lr_factor 1. --save_model /home/anant/data/endovis/COMPRESSED_0_05/results/
+
+##################################################################################################
+
+
+
+##################################################################################################
+# Use this for train_V5.py
+
+python workflow_trainer.py --base /home/anant/data/endovis/COMPRESSED_0_05/TrainingSet --threads 12 --batchsize 16 --imagesize 480 270  --optimizer adam --lr 1e-5 --epochs 200 --folds 21 --device cuda:0 --vislogger_env 2080Ti_Workflow --save_model /home/anant/data/endovis/COMPRESSED_0_05/results/ --validation_interval_epochs 1 --max_iterations 4800 --max_valid_iterations 3600 --run_nfolds 1
+
+python workflow_trainer.py --base /home/anant/data/endovis/COMPRESSED_0_05/TrainingSet --threads 12 --batchsize 16 --imagesize 960 540  --optimizer adam --lr 1e-5 --epochs 200 --folds 21 --device cuda:0 --vislogger_env 2080Ti_Workflow --save_model /home/anant/data/endovis/COMPRESSED_0_05/results/ --validation_interval_epochs 1 --max_iterations 4800 --max_valid_iterations 3600 --run_nfolds 1
+
+
+python workflow_trainer.py --base /home/anant/data/endovis/COMPRESSED_0_05/TrainingSet --threads 12 --batchsize 32 --imagesize 480 270  --optimizer adam --lr 1e-5 --epochs 10 --folds 21 --device cuda:0 --vislogger_env 2080Ti_Workflow --save_model /home/anant/data/endovis/COMPRESSED_0_05/results/ --validation_interval_epochs 1 --max_iterations 3600 --max_valid_iterations 3600 --run_nfolds 1
+
+##################################################################################################
+# Use this for train_V8.py
+
+python workflow_trainer.py --base /home/anant/data/endovis/COMPRESSED_0_05/TrainingSet --threads 12 --batchsize 10 --optimizer adam --lr 1e-5 --epochs 3 --folds 21 --device cuda:0 --vislogger_env Workflow_Analysis --save_model /home/anant/data/endovis/COMPRESSED_0_05/results/ --validation_interval_epochs 1 --max_iterations 60 --max_valid_iterations 60 --run_nfolds 3 --suffix additional_suffix_for_save_folder
+
+##################################################################################################
