@@ -158,7 +158,9 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     ## ======================================= Data ======================================= ##
     # image_transform = Compose([Resize(data_options['image_size'])])
     # image_transform = Compose([Resize(data_options['image_size']), ToTensor()])
-    image_transform = Compose([Resize(data_options['image_size']), ToTensor()])
+    image_transform = Compose([#Resize(data_options['image_size']), 
+                                ToTensor()
+                                ])
                                 # Normalize(mean=[0.485, 0.2131, 0.406],
                                 #             std=[0.229, 0.224, 0.225])])#,
                                 # Normalize(mean=[0.3610,0.2131,0.2324],
@@ -168,7 +170,8 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                                             video_extn='.avi', shuffle=True,
                                             n_folds=data_options['n_folds'], num_phases=14,
                                             batch_size=data_options['batch_size'], 
-                                            num_workers=data_options['n_threads'])
+                                            num_workers=data_options['n_threads'],
+                                            video_folder='videos_480x272')
     ## ======================================= Data ======================================= ##
     
     nfolds_training_loss_avg = CumulativeMovingAvgStd()
