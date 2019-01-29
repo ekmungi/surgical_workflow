@@ -9,7 +9,6 @@ from utils.early_stopping import EarlyStopping
 from utils.helpers import ModelCheckpoint, CumulativeMovingAvgStd, ProgressBar, Engine, create_plot_window, BestScore
 from utils.optimizer_utils import get_optimizer
 
-from torchvision.transforms import Compose, ToTensor, Normalize, Resize
 import torchvision.models as models
 import torch.nn.functional as F
 import torch.nn as nn
@@ -20,11 +19,13 @@ import numpy as np
 import time
 
 
-from batchgenerators.transforms import RangeTransform, NumpyToTensor, Resize, Compose, ChannelFirst, RangeNormalize
+from batchgenerators.transforms import RangeTransform, NumpyToTensor, Compose
 from batchgenerators.transforms.sample_normalization_transforms import MeanStdNormalizationTransform
+from batchgenerators.transforms.external_transforms import ImgaugTransform, ChannelFirst, RangeNormalize
 
 from tqdm import tqdm, trange
 
+import imgaug as ia
 from imgaug import augmenters as iaa
 
 
@@ -32,9 +33,10 @@ from imgaug import augmenters as iaa
 
 # if __name__ == '__main__':
 
-#     EPOCHS = 2
+#     FOLDS = 1
+#     EPOCHS = 4
 #     ITERATIONS = 48
-#     FOLDS = 3
+    
     
 #     image_transform = []
 #     # tr_transforms.append(MirrorTransform((0, 1)))
@@ -42,13 +44,14 @@ from imgaug import augmenters as iaa
 #     # image_transform.append()
 
 #     # image_transform = iaa.Sequential([iaa.Scale(0.25)])
+
+#     iaa_transform = iaa.Sequential([iaa.Scale(0.5)])
     
-#     image_transform = Compose([#Resize(0.5), 
+#     image_transform = Compose([ #ImgaugTransform(iaa_transform),
+#                                 RangeNormalize(0., 1.0), # Faster than the one in BatchGenerators
 #                                 ChannelFirst(), 
-#                                 RangeNormalize(0., 1.0),
-#                                 #RangeTransform(rnge=(0,1), data_key='data'),
 #                                 MeanStdNormalizationTransform(mean=[0.3610,0.2131,0.2324],
-#                                                                 std=[0.0624,0.0463,0.0668]),
+#                                                                std=[0.0624,0.0463,0.0668]),
 #                                 NumpyToTensor(keys=['data', 'target'])
 #                                 ])
     
@@ -57,8 +60,8 @@ from imgaug import augmenters as iaa
 #                                             image_transform=image_transform,
 #                                             video_extn='.avi', shuffle=True,
 #                                             n_folds=3, num_phases=14,
-#                                             batch_size=8, 
-#                                             num_workers=12)
+#                                             batch_size=32, 
+#                                             num_workers=16)
 
 #     folds_pbar = ProgressBar(kfoldWorkflowSet, desc="Folds", pb_len=FOLDS)
 
@@ -71,8 +74,10 @@ from imgaug import augmenters as iaa
 #             for iteration, data_dict in enumerate(iteration_pbar):
 #                 images = data_dict['data']
 #                 phase_annotations = data_dict['target']
-#                 images.to(torch.device('cuda:0'))
-#                 phase_annotations.to(torch.device('cuda:0'))
+
+#                 # print(images.shape)
+#                 # images.to(torch.device('cuda:0'))
+#                 # phase_annotations.to(torch.device('cuda:0'))
 #                 # PERFORM TRAINING HERE!!!
 #                 if iteration+1 == ITERATIONS:
 #                     iteration_pbar.update(n=iteration_pbar.total-iteration)
@@ -92,26 +97,28 @@ from imgaug import augmenters as iaa
 #         time.sleep(0.1)
 #         epoch_pbar.close()
 #         if iFold+1 == FOLDS:
+#             del(train_gen)
+#             del(valid_gen)
 #             folds_pbar.update(n=folds_pbar.total-iFold)
 #             break
-
-
-#     # for iFold in range(FOLDS):
-#     #     train_gen, valid_gen = next(kfoldWorkflowSet)
-#     #     for epoch in range(EPOCHS):
-#     #         t0 = time.time()
-#     #         for iteration in range(ITERATIONS):
-#     #             data_dict = next(train_gen)
-#     #             images = data_dict['data']
-#     #             phase_annotations = data_dict['target']
-#     #             # print (images.shape, phase_annotations.shape)
-#     #         t1 = time.time()
-#     #         print('Fold {0}, Epoch {1} : {2}'.format(iFold, epoch, np.round(t1-t0,2)))
-#     #         time.sleep(0.01)
-#     #     if iFold+1 == FOLDS:
-#     #         break
-#     #     # del(train_gen)
-#     #     # del(valid_gen)
+# 
+# 
+    # for iFold in range(FOLDS):
+    #     train_gen, valid_gen = next(kfoldWorkflowSet)
+    #     for epoch in range(EPOCHS):
+    #         t0 = time.time()
+    #         for iteration in range(ITERATIONS):
+    #             data_dict = next(train_gen)
+    #             images = data_dict['data']
+    #             phase_annotations = data_dict['target']
+    #             # print (images.shape, phase_annotations.shape)
+    #         t1 = time.time()
+    #         print('Fold {0}, Epoch {1} : {2}'.format(iFold, epoch, np.round(t1-t0,2)))
+    #         time.sleep(0.01)
+    #     if iFold+1 == FOLDS:
+    #         break
+    #     # del(train_gen)
+    #     # del(valid_gen)
 
     
 
@@ -248,12 +255,14 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     ## ======================================= Data ======================================= ##
     # image_transform = Compose([Resize(data_options['image_size'])])
     # image_transform = Compose([Resize(data_options['image_size']), ToTensor()])
-    image_transform = Compose([#Resize(data_options['image_size']), 
+    
+    # iaa_transform = iaa.Sequential([iaa.Scale(0.5)]) # Not worth scaling image, haven't found a fast scaler.
+        
+    image_transform = Compose([ #ImgaugTransform(iaa_transform),
+                                RangeNormalize(0., 1.0), # Faster than the one in BatchGenerators
                                 ChannelFirst(), 
-                                RangeNormalize(0., 1.0),
-                                #RangeTransform(rnge=(0,1), data_key='data'),
                                 MeanStdNormalizationTransform(mean=[0.3610,0.2131,0.2324],
-                                                                std=[0.0624,0.0463,0.0668]),
+                                                               std=[0.0624,0.0463,0.0668]),
                                 NumpyToTensor(keys=['data', 'target'])
                                 ])
     
