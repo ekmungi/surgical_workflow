@@ -21,7 +21,7 @@ import time
 
 from batchgenerators.transforms import RangeTransform, NumpyToTensor, Compose
 from batchgenerators.transforms.sample_normalization_transforms import MeanStdNormalizationTransform
-from batchgenerators.transforms.external_transforms import ImgaugTransform, ChannelFirst, RangeNormalize
+from batchgenerators.transforms.external_transforms import ImgaugTransform, ChannelFirst, RangeNormalize, Resize
 
 from tqdm import tqdm, trange
 
@@ -45,9 +45,10 @@ from imgaug import augmenters as iaa
 
 #     # image_transform = iaa.Sequential([iaa.Scale(0.25)])
 
-#     iaa_transform = iaa.Sequential([iaa.Scale(0.5)])
+#     # iaa_transform = iaa.Sequential([iaa.Scale(0.5)])
     
-#     image_transform = Compose([ #ImgaugTransform(iaa_transform),
+#     image_transform = Compose([ #Resize((480, 272)),
+#                                 #ImgaugTransform(iaa_transform), # How to use Imgaug in Batchgenerators
 #                                 RangeNormalize(0., 1.0), # Faster than the one in BatchGenerators
 #                                 ChannelFirst(), 
 #                                 MeanStdNormalizationTransform(mean=[0.3610,0.2131,0.2324],
@@ -101,24 +102,24 @@ from imgaug import augmenters as iaa
 #             del(valid_gen)
 #             folds_pbar.update(n=folds_pbar.total-iFold)
 #             break
-# 
-# 
-    # for iFold in range(FOLDS):
-    #     train_gen, valid_gen = next(kfoldWorkflowSet)
-    #     for epoch in range(EPOCHS):
-    #         t0 = time.time()
-    #         for iteration in range(ITERATIONS):
-    #             data_dict = next(train_gen)
-    #             images = data_dict['data']
-    #             phase_annotations = data_dict['target']
-    #             # print (images.shape, phase_annotations.shape)
-    #         t1 = time.time()
-    #         print('Fold {0}, Epoch {1} : {2}'.format(iFold, epoch, np.round(t1-t0,2)))
-    #         time.sleep(0.01)
-    #     if iFold+1 == FOLDS:
-    #         break
-    #     # del(train_gen)
-    #     # del(valid_gen)
+
+
+#     # for iFold in range(FOLDS):
+#     #     train_gen, valid_gen = next(kfoldWorkflowSet)
+#     #     for epoch in range(EPOCHS):
+#     #         t0 = time.time()
+#     #         for iteration in range(ITERATIONS):
+#     #             data_dict = next(train_gen)
+#     #             images = data_dict['data']
+#     #             phase_annotations = data_dict['target']
+#     #             # print (images.shape, phase_annotations.shape)
+#     #         t1 = time.time()
+#     #         print('Fold {0}, Epoch {1} : {2}'.format(iFold, epoch, np.round(t1-t0,2)))
+#     #         time.sleep(0.01)
+#     #     if iFold+1 == FOLDS:
+#     #         break
+#     #     # del(train_gen)
+#     #     # del(valid_gen)
 
     
 
@@ -258,9 +259,10 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
     
     # iaa_transform = iaa.Sequential([iaa.Scale(0.5)]) # Not worth scaling image, haven't found a fast scaler.
         
-    image_transform = Compose([ #ImgaugTransform(iaa_transform),
+    image_transform = Compose([ #Resize(data_options['image_size']),
                                 RangeNormalize(0., 1.0), # Faster than the one in BatchGenerators
-                                ChannelFirst(), 
+                                ChannelFirst(),
+                                # RangeTransform(), 
                                 MeanStdNormalizationTransform(mean=[0.3610,0.2131,0.2324],
                                                                std=[0.0624,0.0463,0.0668]),
                                 NumpyToTensor(keys=['data', 'target'])
@@ -279,7 +281,8 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                                             video_extn='.avi', shuffle=True,
                                             n_folds=data_options['n_folds'], num_phases=14,
                                             batch_size=data_options['batch_size'], 
-                                            num_workers=data_options['n_threads'])
+                                            num_workers=data_options['n_threads'],
+                                            video_folder='videos_480x272')
     ## ======================================= Data ======================================= ##
     
     nfolds_training_loss_avg = CumulativeMovingAvgStd()
@@ -333,7 +336,6 @@ def train(optimizer_options, data_options, logger_options, model_options, schedu
                             score_type="f1")
 
         for epoch in epoch_pbar:
-
             if (optimizer_options['switch_optimizer'] > 0) and ((epoch+1) % optimizer_options['switch_optimizer'] == 0):
                 temp_optimizer_options = optimizer_options
                 temp_optimizer_options['optimizer'] = 'sgd'

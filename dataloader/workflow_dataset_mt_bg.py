@@ -201,9 +201,13 @@ class kFoldWorkflowSplitMT(DatasetFolder):
     def __init__(self, base_path, image_transform=None, n_folds=4,
                     video_extn='.avi', shuffle=False, num_phases=14, 
                     batch_size=4, num_workers=1, 
-                    use_custom_collate=False):
-        self.video_base_path = os.path.join(base_path, 'videos')
-        self.phase_base_path = os.path.join(base_path, 'phase_annotations')
+                    use_custom_collate=False, video_folder='videos', phase_folder='phase_annotations'):
+        self.video_base_path = os.path.join(base_path, video_folder)
+        self.phase_base_path = os.path.join(base_path, phase_folder)
+
+        # print("\n\n{}\n\n".format(self.video_base_path))
+        # print("\n\n{}\n\n".format(self.phase_base_path))
+
         self.instrument_base_path = None#os.path.join(base_path, 'instrument_annotations')
         self.image_transform = image_transform
         self.video_extn = video_extn
