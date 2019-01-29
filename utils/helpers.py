@@ -351,9 +351,9 @@ class Engine(object):
 
         self.score = Score(score_type=score_type)
 
+    def set_iterator(self, data_iterator):
+        self.data_iterator = data_iterator
         
-
-
     def __call__(self, x=None, y=None):
 
 

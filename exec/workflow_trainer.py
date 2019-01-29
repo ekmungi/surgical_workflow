@@ -6,7 +6,8 @@ sys.path.append('/media/anant/dev/src/surgical_workflow/')
 from argparse import ArgumentParser
 # from exec.train_V1 import train
 # from exec.train_V5 import train
-from exec.train_V8 import train
+# from exec.train_V8 import train
+from exec.train_V9 import train
 from utils.helpers import create_handlers
 
 
